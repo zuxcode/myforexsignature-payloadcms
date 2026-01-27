@@ -1,9 +1,9 @@
 import { postgresAdapter } from '@payloadcms/db-postgres'
 import { vercelBlobStorage } from '@payloadcms/storage-vercel-blob'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
-import path from 'path'
+import path from 'node:path'
 import { buildConfig } from 'payload'
-import { fileURLToPath } from 'url'
+import { fileURLToPath } from 'node:url'
 import sharp from 'sharp'
 import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 import nodemailer from 'nodemailer'
@@ -66,10 +66,10 @@ export default buildConfig({
     }),
   }),
   cors: {
-    origins: [CSRF_WHITELIST_DOMAIN, SERVER_URL, window.location.origin],
+    origins: [CSRF_WHITELIST_DOMAIN, SERVER_URL, 'https://myforexsignature-payloadcms.vercel.app'],
     headers: ['x-custom-header'],
   },
-  csrf: [CSRF_WHITELIST_DOMAIN, SERVER_URL],
+  csrf: [CSRF_WHITELIST_DOMAIN, SERVER_URL, 'https://myforexsignature-payloadcms.vercel.app'],
   jobs: {
     jobsCollectionOverrides: ({ defaultJobsCollection }) => {
       if (!defaultJobsCollection.admin) {
