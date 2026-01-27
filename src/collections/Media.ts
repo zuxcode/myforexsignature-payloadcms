@@ -80,9 +80,6 @@ export const Media: CollectionConfig = {
         formatOptions: { format: 'webp', options: { quality: 90 } },
       },
     ],
-    
-    // adapter: 'vercel-blob',
-    // staticDir: path.resolve(dirname, '../../public/media'),
   },
   hooks: {
     beforeChange: [

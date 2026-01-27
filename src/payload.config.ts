@@ -66,10 +66,22 @@ export default buildConfig({
     }),
   }),
   cors: {
-    origins: [CSRF_WHITELIST_DOMAIN, SERVER_URL, 'https://myforexsignature-payloadcms.vercel.app'],
+    origins: [
+      CSRF_WHITELIST_DOMAIN,
+      SERVER_URL,
+      'https://myforexsignature-payloadcms.vercel.app',
+      'http://localhost:3000',
+      'http://localhost:3001',
+    ],
     headers: ['x-custom-header'],
   },
-  csrf: [CSRF_WHITELIST_DOMAIN, SERVER_URL, 'https://myforexsignature-payloadcms.vercel.app'],
+  csrf: [
+    CSRF_WHITELIST_DOMAIN,
+    SERVER_URL,
+    'https://myforexsignature-payloadcms.vercel.app',
+    'http://localhost:3000',
+    'http://localhost:3001',
+  ],
   jobs: {
     jobsCollectionOverrides: ({ defaultJobsCollection }) => {
       if (!defaultJobsCollection.admin) {
