@@ -48,12 +48,10 @@ export default buildConfig({
       collections: {
         media: true,
       },
-      
     }),
   ],
 
   // ChiTheDev Effect
-  // upload: {},
   serverURL: SERVER_URL,
   email: nodemailerAdapter({
     defaultFromAddress: 'notification@myforexsignatureacademy.com',
