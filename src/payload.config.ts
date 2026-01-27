@@ -66,7 +66,7 @@ export default buildConfig({
     }),
   }),
   cors: {
-    origins: [CSRF_WHITELIST_DOMAIN, SERVER_URL],
+    origins: [CSRF_WHITELIST_DOMAIN, SERVER_URL, window.location.origin],
     headers: ['x-custom-header'],
   },
   csrf: [CSRF_WHITELIST_DOMAIN, SERVER_URL],
