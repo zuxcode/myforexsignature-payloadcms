@@ -1,3 +1,4 @@
+import { isPublicAccess } from '@/access/isPublicAccess'
 import { slugField, type CollectionConfig } from 'payload'
 import { slugify } from 'payload/shared'
 
@@ -12,7 +13,11 @@ export const Tags: CollectionConfig = {
   },
 
   access: {
-    read: () => true,
+    read: isPublicAccess,
+    create: isPublicAccess,
+    update: isPublicAccess,
+    delete: isPublicAccess,
+    // read: () => true,
     //   create: ({ req: { user } }) => user?.roles?.includes("admin") ?? false,
     //   update: ({ req: { user } }) => user?.roles?.includes("admin") ?? false,
     //   delete: ({ req: { user } }) => user?.roles?.includes("admin") ?? false,

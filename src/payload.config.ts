@@ -37,7 +37,7 @@ export default buildConfig({
   db: postgresAdapter({
     pool: {
       connectionString: process.env.DATABASE_URL || '',
-      ssl: true //process.env.NODE_ENV === 'production',
+      ssl: true, //process.env.NODE_ENV === 'production',
     },
   }),
   sharp,
@@ -59,10 +59,10 @@ export default buildConfig({
     }),
   }),
   cors: {
-    origins: [CSRF_WHITELIST_DOMAIN, SERVER_URL, '*'],
+    origins: [CSRF_WHITELIST_DOMAIN, SERVER_URL],
     headers: ['x-custom-header'],
   },
-  csrf: [CSRF_WHITELIST_DOMAIN, SERVER_URL, '*'],
+  csrf: [CSRF_WHITELIST_DOMAIN, SERVER_URL],
   jobs: {
     jobsCollectionOverrides: ({ defaultJobsCollection }) => {
       if (!defaultJobsCollection.admin) {

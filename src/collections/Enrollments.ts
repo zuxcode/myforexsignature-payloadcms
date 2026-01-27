@@ -1,3 +1,4 @@
+import { isPublicAccess } from '@/access/isPublicAccess'
 import type { CollectionConfig } from 'payload'
 
 export const Enrollments: CollectionConfig = {
@@ -11,14 +12,19 @@ export const Enrollments: CollectionConfig = {
 
   access: {
     // Users can read their own enrollments
-    read: ({ req: { user } }) => {
-      if (user?.roles?.includes('admin')) return true
-      return { user: { equals: user?.id } }
-    },
+    read: isPublicAccess,
     // Only admins can create/update (frontend handles via API/hook)
-    create: ({ req: { user } }) => user?.roles?.includes('admin') ?? false,
-    update: ({ req: { user } }) => user?.roles?.includes('admin') ?? false,
-    delete: ({ req: { user } }) => user?.roles?.includes('admin') ?? false,
+    create: isPublicAccess,
+    update: isPublicAccess,
+    delete: isPublicAccess,
+    // read: ({ req: { user } }) => {
+    //   if (user?.roles?.includes('admin')) return true
+    //   return { user: { equals: user?.id } }
+    // },
+    // // Only admins can create/update (frontend handles via API/hook)
+    // create: ({ req: { user } }) => user?.roles?.includes('admin') ?? false,
+    // update: ({ req: { user } }) => user?.roles?.includes('admin') ?? false,
+    // delete: ({ req: { user } }) => user?.roles?.includes('admin') ?? false,
   },
 
   fields: [

@@ -1,14 +1,15 @@
-// import { canReadMedia } from "@/access/canReadMedia";
-// import { isAdmin } from "@/access/isAdmin";
-// import { isAuthenticated } from "@/access/isAuthenticated";
+import { canReadMedia } from '@/access/canReadMedia'
+import { isAdmin } from '@/access/isAdmin'
+import { isAuthenticated } from '@/access/isAuthenticated'
+import { isPublicAccess } from '@/access/isPublicAccess'
 import {
   FixedToolbarFeature,
   InlineToolbarFeature,
   lexicalEditor,
 } from '@payloadcms/richtext-lexical'
-import path from 'path'
+import path from 'node:path'
 import type { CollectionConfig } from 'payload'
-import { fileURLToPath } from 'url'
+import { fileURLToPath } from 'node:url'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -28,13 +29,14 @@ export const Media: CollectionConfig = {
       'Central media library. Public files are visible to everyone (e.g., product screenshots). Private files are restricted – only the uploader or admin can view them (e.g., payment receipts).',
   },
   access: {
-    read: ({ req }) => {
-      return true
-    },
+    read: isPublicAccess,
+    create: isPublicAccess,
+    update: isPublicAccess,
+    delete: isPublicAccess,
     // read: canReadMedia,
-    //   create: isAuthenticated,
-    //   update: isAdmin,
-    //   delete: isAdmin,
+    // create: isAuthenticated,
+    // update: isAdmin,
+    // delete: isAdmin,
   },
   timestamps: true,
 
@@ -83,6 +85,9 @@ export const Media: CollectionConfig = {
   hooks: {
     beforeChange: [
       async ({ req, operation, data }) => {
+        console.log(req.user)
+        console.log(operation)
+
         if (!req.user) return data
 
         if (operation === 'create') {

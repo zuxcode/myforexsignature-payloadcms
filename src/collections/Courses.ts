@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { slugify } from 'payload/shared'
+import { isPublicAccess } from '@/access/isPublicAccess'
 
 export const CoursesCollection: CollectionConfig = {
   slug: 'courses',
@@ -12,10 +13,14 @@ export const CoursesCollection: CollectionConfig = {
   },
 
   access: {
-    read: () => true,
-    create: ({ req: { user } }) => user?.roles?.includes('admin') ?? false,
-    update: ({ req: { user } }) => user?.roles?.includes('admin') ?? false,
-    delete: ({ req: { user } }) => user?.roles?.includes('admin') ?? false,
+    read: isPublicAccess,
+    create: isPublicAccess,
+    update: isPublicAccess,
+    delete: isPublicAccess,
+    // read: () => true,
+    // create: ({ req: { user } }) => user?.roles?.includes('admin') ?? false,
+    // update: ({ req: { user } }) => user?.roles?.includes('admin') ?? false,
+    // delete: ({ req: { user } }) => user?.roles?.includes('admin') ?? false,
   },
 
   fields: [
