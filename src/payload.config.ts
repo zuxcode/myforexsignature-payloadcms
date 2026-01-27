@@ -37,7 +37,7 @@ export default buildConfig({
   db: postgresAdapter({
     pool: {
       connectionString: process.env.DATABASE_URL || '',
-      ssl: true,
+      ssl: process.env.NODE_ENV === 'development',
     },
   }),
   sharp,
