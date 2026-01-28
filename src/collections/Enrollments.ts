@@ -1,30 +1,22 @@
-import { isPublicAccess } from '@/access/isPublicAccess'
 import type { CollectionConfig } from 'payload'
 
 export const Enrollments: CollectionConfig = {
   slug: 'enrollments',
   admin: {
     group: 'course',
-    useAsTitle: 'userEmail', // Custom title – shows user email + course
-    defaultColumns: ['user', 'course', 'enrolledAt', 'progress', 'status'],
-    description: 'Tracks user enrollments in courses – free or paid.',
+    useAsTitle: 'userEmail',
+    defaultColumns: ['user', 'course', 'enrolledAt', 'progress', 'watchHours', 'status'],
+    description: 'Tracks user enrollments in courses – free or paid, with watch time analytics.',
   },
 
   access: {
-    // Users can read their own enrollments
-    read: isPublicAccess,
-    // Only admins can create/update (frontend handles via API/hook)
-    create: isPublicAccess,
-    update: isPublicAccess,
-    delete: isPublicAccess,
-    // read: ({ req: { user } }) => {
-    //   if (user?.roles?.includes('admin')) return true
-    //   return { user: { equals: user?.id } }
-    // },
-    // // Only admins can create/update (frontend handles via API/hook)
-    // create: ({ req: { user } }) => user?.roles?.includes('admin') ?? false,
-    // update: ({ req: { user } }) => user?.roles?.includes('admin') ?? false,
-    // delete: ({ req: { user } }) => user?.roles?.includes('admin') ?? false,
+    read: ({ req: { user } }) => {
+      if (user?.roles?.includes('admin')) return true
+      return { user: { equals: user?.id } }
+    },
+    create: ({ req: { user } }) => user?.roles?.includes('admin') ?? false,
+    update: ({ req: { user } }) => user?.roles?.includes('admin') ?? false,
+    delete: ({ req: { user } }) => user?.roles?.includes('admin') ?? false,
   },
 
   fields: [
@@ -33,10 +25,7 @@ export const Enrollments: CollectionConfig = {
       type: 'relationship',
       relationTo: 'users',
       required: true,
-      index: true, // For fast queries
-      admin: {
-        position: 'sidebar',
-      },
+      index: true,
     },
     {
       name: 'course',
@@ -44,39 +33,24 @@ export const Enrollments: CollectionConfig = {
       relationTo: 'courses',
       required: true,
       index: true,
-      admin: {
-        position: 'sidebar',
-      },
     },
     {
-      name: 'userEmail', // Denormalized for easy admin display/search
+      name: 'userEmail',
       type: 'text',
-      admin: {
-        readOnly: true,
-        description: 'Auto-populated from user for quick search.',
-      },
+      admin: { readOnly: true, position: 'sidebar' },
     },
     {
-      name: 'courseTitle', // Denormalized
+      name: 'courseTitle',
       type: 'text',
-      admin: {
-        readOnly: true,
-      },
+      admin: { readOnly: true, position: 'sidebar' },
     },
-
     {
       name: 'enrolledAt',
       type: 'date',
       required: true,
       defaultValue: () => new Date().toISOString(),
-      admin: {
-        position: 'sidebar',
-        date: {
-          pickerAppearance: 'dayOnly',
-        },
-      },
+      admin: { position: 'sidebar' },
     },
-
     {
       name: 'status',
       type: 'select',
@@ -86,35 +60,61 @@ export const Enrollments: CollectionConfig = {
         { label: 'Completed', value: 'completed' },
       ],
       defaultValue: 'enrolled',
-      admin: {
-        position: 'sidebar',
-      },
+      required: true,
+      admin: { position: 'sidebar' },
     },
-
     {
       name: 'progress',
       type: 'number',
       min: 0,
       max: 100,
       defaultValue: 0,
+    },
+    {
+      name: 'watchHours',
+      type: 'number',
+      min: 0,
+      defaultValue: 0,
       admin: {
-        description: '% complete – updated by frontend or lesson completion hooks.',
+        description: 'Total hours watched (decimal). Auto-calculated from lesson watch time.',
+        position: 'sidebar',
       },
     },
-
-    // Optional: Track completed lessons for granular progress
     {
-      name: 'completedLessons',
+      name: 'lessonWatchTime',
       type: 'array',
       fields: [
         {
           name: 'lessonId',
-          type: 'text', // Or relationship if lessons have IDs
+          type: 'text',
+          required: true,
         },
         {
-          name: 'completedAt',
+          name: 'watchedSeconds',
+          type: 'number',
+          min: 0,
+          defaultValue: 0,
+        },
+        {
+          name: 'lastWatchedAt',
           type: 'date',
         },
+      ],
+    },
+    {
+      name: 'completedLessons',
+      type: 'array',
+      fields: [
+        { name: 'lessonId', type: 'text' },
+        { name: 'completedAt', type: 'date' },
+      ],
+    },
+    {
+      name: 'completedSections',
+      type: 'array',
+      fields: [
+        { name: 'sectionId', type: 'text' },
+        { name: 'completedAt', type: 'date' },
       ],
     },
   ],
@@ -122,8 +122,8 @@ export const Enrollments: CollectionConfig = {
   hooks: {
     beforeChange: [
       async ({ data, req, operation }) => {
+        // Denormalize userEmail & courseTitle on create
         if (operation === 'create') {
-          // Denormalize for easy admin search/display
           const user = await req.payload.findByID({
             collection: 'users',
             id: data.user,
@@ -135,17 +135,26 @@ export const Enrollments: CollectionConfig = {
             depth: 0,
           })
 
-          return {
-            ...data,
-            userEmail: user.email,
-            courseTitle: course.title,
-          }
+          data.userEmail = user.email
+          data.courseTitle = course.title
+          data.courseSlug = course.slug
         }
+
+        // Auto-calculate watchHours from lessonWatchTime on create/update
+        if (data.lessonWatchTime?.length > 0) {
+          const totalSeconds = data.lessonWatchTime.reduce(
+            (acc: number, l: { watchedSeconds?: number }) => acc + (l.watchedSeconds || 0),
+            0,
+          )
+          data.watchHours = Number((totalSeconds / 3600).toFixed(2))
+        } else {
+          data.watchHours = 0
+        }
+
         return data
       },
     ],
 
-    // Prevent duplicate enrollments
     beforeValidate: [
       async ({ data, req, operation }) => {
         if (operation === 'create') {
@@ -156,7 +165,6 @@ export const Enrollments: CollectionConfig = {
             },
             limit: 1,
           })
-
           if (existing.docs.length > 0) {
             throw new Error('User is already enrolled in this course')
           }

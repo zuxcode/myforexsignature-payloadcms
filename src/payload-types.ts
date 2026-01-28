@@ -165,7 +165,7 @@ export interface User {
   password?: string | null;
 }
 /**
- * Central media library. Public files are visible to everyone (e.g., product screenshots). Private files are restricted – only the uploader or admin can view them (e.g., payment receipts).
+ * Central media library. Public files are visible to everyone. Private files are restricted – only the uploader or admin can view them.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media".
@@ -345,7 +345,7 @@ export interface Tag {
   createdAt: string;
 }
 /**
- * Tracks user enrollments in courses – free or paid.
+ * Tracks user enrollments in courses – free or paid, with watch time analytics.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "enrollments".
@@ -354,20 +354,33 @@ export interface Enrollment {
   id: number;
   user: number | User;
   course: number | Course;
-  /**
-   * Auto-populated from user for quick search.
-   */
   userEmail?: string | null;
   courseTitle?: string | null;
   enrolledAt: string;
-  status?: ('enrolled' | 'in-progress' | 'completed') | null;
-  /**
-   * % complete – updated by frontend or lesson completion hooks.
-   */
+  status: 'enrolled' | 'in-progress' | 'completed';
   progress?: number | null;
+  /**
+   * Total hours watched (decimal). Auto-calculated from lesson watch time.
+   */
+  watchHours?: number | null;
+  lessonWatchTime?:
+    | {
+        lessonId: string;
+        watchedSeconds?: number | null;
+        lastWatchedAt?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   completedLessons?:
     | {
         lessonId?: string | null;
+        completedAt?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  completedSections?:
+    | {
+        sectionId?: string | null;
         completedAt?: string | null;
         id?: string | null;
       }[]
@@ -724,10 +737,26 @@ export interface EnrollmentsSelect<T extends boolean = true> {
   enrolledAt?: T;
   status?: T;
   progress?: T;
+  watchHours?: T;
+  lessonWatchTime?:
+    | T
+    | {
+        lessonId?: T;
+        watchedSeconds?: T;
+        lastWatchedAt?: T;
+        id?: T;
+      };
   completedLessons?:
     | T
     | {
         lessonId?: T;
+        completedAt?: T;
+        id?: T;
+      };
+  completedSections?:
+    | T
+    | {
+        sectionId?: T;
         completedAt?: T;
         id?: T;
       };

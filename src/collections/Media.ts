@@ -7,12 +7,8 @@ import {
   InlineToolbarFeature,
   lexicalEditor,
 } from '@payloadcms/richtext-lexical'
-import path from 'node:path'
 import type { CollectionConfig } from 'payload'
-import { fileURLToPath } from 'node:url'
 
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
 
 export const Media: CollectionConfig = {
   slug: 'media',
@@ -26,7 +22,7 @@ export const Media: CollectionConfig = {
     group: 'Content',
     defaultColumns: ['filename', 'type', 'alt', 'uploadedBy', 'updatedAt'],
     description:
-      'Central media library. Public files are visible to everyone (e.g., product screenshots). Private files are restricted – only the uploader or admin can view them (e.g., payment receipts).',
+      'Central media library. Public files are visible to everyone. Private files are restricted – only the uploader or admin can view them.',
   },
   access: {
     read: isPublicAccess,
