@@ -34,17 +34,17 @@ export async function POST(request: Request) {
     }
 
     // Create pending purchase record
-    const purchase = await payloadInstance.create({
-      collection: 'course-purchases',
-      data: {
-        user: body?.userId,
-        course: body?.courseId,
-        amount: course?.price, // Assumes price in cents (number)
-        currency: 'NGN',
-        status: 'pending',
-        orderId: `order_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      },
-    })
+    // const purchase = await payloadInstance.create({
+    //   collection: 'course-purchases',
+    //   data: {
+    //     user: body?.userId,
+    //     course: body?.courseId,
+    //     amount: course?.price, // Assumes price in cents (number)
+    //     currency: 'NGN',
+    //     status: 'pending',
+    //     orderId: `order_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    //   },
+    // })
 
     // Create Stripe Checkout Session
     const session = await stripe.checkout.sessions.create({
@@ -65,7 +65,7 @@ export async function POST(request: Request) {
         },
       ],
       metadata: {
-        purchaseId: purchase.id,
+        // purchaseId: purchase.id,
         courseId: course.id,
         userId: body.userId,
       },
